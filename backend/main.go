@@ -1,3 +1,7 @@
+// API WITHOUT DB
+
+// WE DO THIS USING MEMORY , HENCE THE DATA GETS DELETED EVERY TIME WE RESTART
+
 package main
 
 import (
@@ -21,7 +25,7 @@ func main() {
 	todos := []Todo{}
 
 	// GET: Just to test server
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/api/todos", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(fiber.Map{"msg": "hello world"})
 	})
 
@@ -55,6 +59,24 @@ func main() {
 		}
 
 		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
+	})
+
+	app.Delete("/api/todos/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		for i, todo := range todos {
+			if fmt.Sprint(todo.ID) == id { // since ID is int and id is string , fmt.Sprint(ID) -> convrts ID to String
+				todos = append(todos[:i], todos[i+1:]...)
+				return c.Status(200).JSON(fiber.Map{"succexx": true})
+				// 1 2 3 4 5 [ i =4 ]
+				// todos[:i] -> from index o to i-1; -->  1 2
+				//todos[i+1:] -> from index i+1 to end --> 4 5
+				// append these -> 1 2 4 5 [ hence 3 is deleted]			}
+
+			}
+		}
+		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
+
 	})
 
 	log.Fatal(app.Listen(":4000"))
